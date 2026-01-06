@@ -1,0 +1,30 @@
+# Policy Enforcer Configuration
+
+# RabbitMQ settings
+rabbitmq:
+  host: localhost
+  port: 30020
+  username: guest
+  password: guest
+  queue: policyEnforcer-in
+  exchange: topic_exchange
+  routing_key: policy.enforcer
+  prefetch_count: 10
+  reconnect_delay: 5s
+
+# eFLINT server settings
+eflint:
+  host: localhost
+  port: 8123
+  server_path: eflint-server # Path to the eflint-server executable
+  model_path: "/eflint/dynamos-agreement.eflint" # Default model path (optional)
+  timeout: 30s
+  reconnect_delay: 5s
+  max_retries: 3
+
+# Logging settings
+logging:
+  level: info  # debug, info, warn, error
+  format: json  # json or console
+  output: stdout  # stdout, stderr, or file path
+  development: false

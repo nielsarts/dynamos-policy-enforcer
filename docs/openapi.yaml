@@ -1,0 +1,638 @@
+openapi: 3.0.3
+info:
+  title: eFLINT Policy Enforcer API
+  description: |
+    API for managing eFLINT server instances in the DYNAMOS system.
+    
+    This API provides endpoints for:
+    - **Instance Management**: Start, stop, and monitor eFLINT server instances
+    - **Commands**: Send commands to the eFLINT server
+    - **State Management (POC)**: Get state, export, import, and checkpoint eFLINT execution graphs
+    
+    ## Architecture
+    The Policy Enforcer manages a single eFLINT server instance that processes
+    policy validation requests. The eFLINT server communicates via TCP using
+    JSON-based commands.
+  version: 1.2.0
+  contact:
+    name: Niels Arts
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  # ---------------------------------------------------------------------------
+  # Instance Management Endpoints
+  # ---------------------------------------------------------------------------
+  /eflint/status:
+    get:
+      summary: Get instance status
+      description: Returns the current status of the eFLINT server instance
+      operationId: getStatus
+      tags:
+        - Instance Management
+      responses:
+        '200':
+          description: Status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+
+  /eflint/start:
+    post:
+      summary: Start instance
+      description: |
+        Starts the eFLINT server instance with the given model.
+        
+        If an instance is already running:
+        - With `force=false` (default): Returns 409 Conflict
+        - With `force=true`: Stops the existing instance and starts a new one
+      operationId: startInstance
+      tags:
+        - Instance Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartRequest'
+            examples:
+              simple:
+                summary: Start with model
+                value:
+                  model_location: "/path/to/model.eflint"
+              force:
+                summary: Force restart with new model
+                value:
+                  model_location: "/path/to/model.eflint"
+                  force: true
+      responses:
+        '200':
+          description: Instance started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          description: Bad request - model_location is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Instance already running (use force=true to restart)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /eflint/stop:
+    post:
+      summary: Stop instance
+      description: Stops the running eFLINT server instance
+      operationId: stopInstance
+      tags:
+        - Instance Management
+      responses:
+        '200':
+          description: Instance stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404':
+          description: No instance running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /eflint/command:
+    post:
+      summary: Send command
+      description: Sends a command to the eFLINT server instance
+      operationId: sendCommand
+      tags:
+        - Instance Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommandRequest'
+            examples:
+              phrase:
+                summary: Execute a phrase
+                value:
+                  command: '{"command": "phrase", "text": "tick()"}'
+              export:
+                summary: Create export
+                value:
+                  command: '{"command": "create-export"}'
+      responses:
+        '200':
+          description: Command executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandResponse'
+        '400':
+          description: Bad request - command is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No instance running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Instance is not running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ---------------------------------------------------------------------------
+  # State Management Endpoints (POC)
+  # ---------------------------------------------------------------------------
+  /eflint/state:
+    get:
+      summary: Get current state
+      description: Retrieves the current execution graph state of the eFLINT instance
+      operationId: getState
+      tags:
+        - State Management
+      responses:
+        '200':
+          description: State retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StateResponse'
+        '503':
+          description: Instance is not running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /eflint/state/export:
+    post:
+      summary: Export state
+      description: |
+        Exports the current eFLINT execution graph state for later import.
+        Returns a SavedState object with metadata that can be stored and restored.
+      operationId: exportState
+      tags:
+        - State Management
+      responses:
+        '200':
+          description: State exported successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportStateResponse'
+        '503':
+          description: Instance is not running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /eflint/state/import:
+    post:
+      summary: Import state
+      description: |
+        Imports a previously exported eFLINT execution graph state.
+        
+        > **Note**: Due to limitations in the eFLINT server's load-export functionality,
+        > full state restoration may not work in all cases.
+      operationId: importState
+      tags:
+        - State Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportStateRequest'
+      responses:
+        '200':
+          description: State imported successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad request - state is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Instance is not running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /eflint/state/checkpoint:
+    post:
+      summary: Create checkpoint
+      description: Creates a named checkpoint of the current state that can be restored later
+      operationId: createCheckpoint
+      tags:
+        - State Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckpointRequest'
+            example:
+              name: "before-test"
+      responses:
+        '200':
+          description: Checkpoint created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckpointCreatedResponse'
+        '400':
+          description: Bad request - name is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Instance is not running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /eflint/state/checkpoint/restore:
+    post:
+      summary: Restore checkpoint
+      description: |
+        Restores a previously created checkpoint.
+        
+        > **Note**: Due to a bug in the eFLINT server, full state restoration may not work.
+        > In that case, the instance will be restarted to the initial model state.
+      operationId: restoreCheckpoint
+      tags:
+        - State Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckpointRequest'
+            example:
+              name: "before-test"
+      responses:
+        '200':
+          description: Checkpoint restored successfully (or partially with warning)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckpointRestoredResponse'
+        '400':
+          description: Bad request - name is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Instance is not running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /eflint/state/checkpoints:
+    get:
+      summary: List checkpoints
+      description: Lists all available checkpoints
+      operationId: listCheckpoints
+      tags:
+        - State Management
+      responses:
+        '200':
+          description: Checkpoints listed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckpointListResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /eflint/state/checkpoint/{name}:
+    delete:
+      summary: Delete checkpoint
+      description: Deletes a checkpoint by name
+      operationId: deleteCheckpoint
+      tags:
+        - State Management
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: The name of the checkpoint to delete
+          schema:
+            type: string
+          example: "before-test"
+      responses:
+        '200':
+          description: Checkpoint deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckpointDeletedResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ---------------------------------------------------------------------------
+  # Health Endpoints
+  # ---------------------------------------------------------------------------
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the service
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Status:
+                    type: string
+                    example: "OK"
+
+# -----------------------------------------------------------------------------
+# Components
+# -----------------------------------------------------------------------------
+components:
+  schemas:
+    # -------------------------------------------------------------------------
+    # Instance Management Schemas
+    # -------------------------------------------------------------------------
+    StatusResponse:
+      type: object
+      properties:
+        running:
+          type: boolean
+          description: Whether the instance is running
+          example: true
+        port:
+          type: integer
+          description: The port the instance is running on
+          example: 8123
+        model_location:
+          type: string
+          description: The path to the model file
+          example: "/path/to/model.eflint"
+
+    StartRequest:
+      type: object
+      required:
+        - model_location
+      properties:
+        model_location:
+          type: string
+          description: Path to the eFLINT model file
+          example: "/path/to/model.eflint"
+        force:
+          type: boolean
+          description: Force restart if an instance is already running
+          default: false
+          example: false
+
+    CommandRequest:
+      type: object
+      required:
+        - command
+      properties:
+        command:
+          type: string
+          description: The command to send to the eFLINT server (JSON string)
+          example: '{"command": "phrase", "text": "tick()"}'
+
+    CommandResponse:
+      type: object
+      properties:
+        response:
+          type: object
+          description: The parsed JSON response from eFLINT
+
+    # -------------------------------------------------------------------------
+    # State Management Schemas
+    # -------------------------------------------------------------------------
+    StateResponse:
+      type: object
+      properties:
+        state:
+          type: object
+          description: The current execution graph state
+
+    SavedState:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the saved state
+          example: "state-1704470400000000000"
+        model_location:
+          type: string
+          description: The model location when the state was saved
+          example: "/eflint/dynamos-agreement.eflint"
+        graph:
+          type: object
+          description: The eFLINT execution graph
+        saved_at:
+          type: string
+          format: date-time
+          description: When the state was saved
+          example: "2026-01-05T15:30:00Z"
+
+    ExportStateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        state:
+          $ref: '#/components/schemas/SavedState'
+
+    ImportStateRequest:
+      type: object
+      required:
+        - state
+      properties:
+        state:
+          $ref: '#/components/schemas/SavedState'
+
+    CheckpointRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: The name of the checkpoint
+          example: "before-test"
+
+    CheckpointCreatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        checkpoint:
+          type: string
+          description: The name of the created checkpoint
+          example: "before-test"
+        state_id:
+          type: string
+          description: The ID of the saved state
+          example: "state-1704470400000000000"
+        saved_at:
+          type: string
+          format: date-time
+          example: "2026-01-05T15:30:00Z"
+
+    CheckpointRestoredResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "checkpoint restored successfully"
+        restored:
+          type: string
+          description: The name of the restored checkpoint
+          example: "before-test"
+
+    CheckpointListResponse:
+      type: object
+      properties:
+        checkpoints:
+          type: array
+          items:
+            type: string
+          description: List of checkpoint names
+          example: ["before-test", "initial-state"]
+
+    CheckpointDeletedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "checkpoint deleted successfully"
+        deleted:
+          type: string
+          description: The name of the deleted checkpoint
+          example: "before-test"
+
+    # -------------------------------------------------------------------------
+    # Common Schemas
+    # -------------------------------------------------------------------------
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "no instance running"
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "operation completed successfully"
+
+# -----------------------------------------------------------------------------
+# Tags
+# -----------------------------------------------------------------------------
+tags:
+  - name: Instance Management
+    description: Endpoints for managing the eFLINT server instance lifecycle
+  - name: State Management
+    description: Endpoints for getting, exporting, importing, and managing eFLINT state checkpoints (POC)
+  - name: Health
+    description: Health check endpoints

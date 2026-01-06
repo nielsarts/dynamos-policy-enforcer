@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  dynamos-policy-enforcer:
+    build:
+      context: .
+    ports:
+      - 8912:8080
+    volumes:
+      - ./eflint:/eflint
+    deploy:
+      restart_policy:
+        condition: on-failure
