@@ -36,7 +36,6 @@ go.work.sum
 
 # Project-specific binaries
 policy-enforcer
-cmd/policy-enforcer/policy-enforcer
 
 # Build directories
 bin/

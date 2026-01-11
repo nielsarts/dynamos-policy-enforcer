@@ -41,8 +41,8 @@ eFLINT Server (Haskell)
 
 ```bash
 # Clone the repository
-git clone https://github.com/nielsarts/dynamos-eflint-policy-enforcer.git
-cd dynamos-eflint-policy-enforcer
+git clone https://github.com/nielsarts/dynamos-policy-enforcer.git
+cd dynamos-policy-enforcer
 
 # Download dependencies
 go mod download
