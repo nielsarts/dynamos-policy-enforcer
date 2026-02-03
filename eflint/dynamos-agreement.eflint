@@ -111,7 +111,8 @@ Act authorize-archetype
   Related to arch
   Creates    allowed-archetype(org, req, arch)
   Holds when registered-with(org, req)
-         && archetype(arch).
+         && archetype(arch)
+         && available-archetype(org, arch).
 
 Act revoke-archetype
   Actor      org
@@ -126,7 +127,8 @@ Act authorize-compute-provider
   Related to provider
   Creates    allowed-compute-provider(org, req, provider)
   Holds when registered-with(org, req)
-         && compute-provider(provider).
+         && compute-provider(provider)
+         && available-compute-provider(org, provider).
 
 Act revoke-compute-provider
   Actor      org
@@ -155,11 +157,7 @@ Fact request-allowed Identified by org * req * rtype * dataset * arch * provider
           When Enabled(submit-request(req, org, rtype, dataset, arch, provider)).
 
 // ---------------------------------------------------------------------------
-// Seed data corresponding to configuration/etcd_launch_files/agreements.json
 // Organizations
-
-
-
 +organization("VU").
 +organization("UVA").
 +organization("RUG").
@@ -184,47 +182,42 @@ Fact request-allowed Identified by org * req * rtype * dataset * arch * provider
 +requester("jorrit.stutterheim@cloudnation.nl").
 
 // Available providers and archetypes per organization (from 'computeProviders' and 'archetypes')
-+available-compute-provider("VU",  "SURF").
-+available-compute-provider("VU",  "otherCompany").
-+available-compute-provider("UVA", "SURF").
-+available-compute-provider("UVA", "otherCompany").
+add-available-compute-provider("VU",  "otherCompany").
+add-available-compute-provider("UVA", "SURF").
+add-available-compute-provider("VU",  "SURF").
+add-available-compute-provider("UVA", "otherCompany").
 
-+available-archetype("VU",  "computeToData").
-+available-archetype("VU",  "dataThroughTtp").
-+available-archetype("VU",  "reproducableScience").
-+available-archetype("UVA", "computeToData").
-+available-archetype("UVA", "dataThroughTtp").
-+available-archetype("UVA", "reproducableScience").
+add-available-archetype("VU",  "computeToData").
+add-available-archetype("VU",  "dataThroughTtp").
+add-available-archetype("VU",  "reproducableScience").
+add-available-archetype("UVA", "computeToData").
+add-available-archetype("UVA", "dataThroughTtp").
+add-available-archetype("UVA", "reproducableScience").
 
 // Relations (from 'relations' blocks)
 +registered-with("VU",  "jorrit.stutterheim@cloudnation.nl").
 +registered-with("UVA", "jorrit.stutterheim@cloudnation.nl").
 
-// Allowed lists for VU
-+allowed-request-type("VU",  "jorrit.stutterheim@cloudnation.nl", "sqlDataRequest").
-+allowed-request-type("VU",  "jorrit.stutterheim@cloudnation.nl", "genericRequest").
-+allowed-data-set("VU",      "jorrit.stutterheim@cloudnation.nl", "wageGap").
-+allowed-archetype("VU",     "jorrit.stutterheim@cloudnation.nl", "computeToData").
-+allowed-archetype("VU",     "jorrit.stutterheim@cloudnation.nl", "dataThroughTtp").
-+allowed-compute-provider("VU", "jorrit.stutterheim@cloudnation.nl", "SURF").
+// authorize lists for VU
+authorize-request-type("VU",  "jorrit.stutterheim@cloudnation.nl", "sqlDataRequest").
+authorize-request-type("VU",  "jorrit.stutterheim@cloudnation.nl", "genericRequest").
+authorize-data-set("VU",      "jorrit.stutterheim@cloudnation.nl", "wageGap").
+authorize-archetype("VU",     "jorrit.stutterheim@cloudnation.nl", "computeToData").
+authorize-archetype("VU",     "jorrit.stutterheim@cloudnation.nl", "dataThroughTtp").
+authorize-compute-provider("VU", "jorrit.stutterheim@cloudnation.nl", "SURF").
 
-// Allowed lists for UVA
-+allowed-request-type("UVA", "jorrit.stutterheim@cloudnation.nl", "sqlDataRequest").
-+allowed-request-type("UVA", "jorrit.stutterheim@cloudnation.nl", "genericRequest").
-+allowed-data-set("UVA",     "jorrit.stutterheim@cloudnation.nl", "wageGap").
-+allowed-archetype("UVA",    "jorrit.stutterheim@cloudnation.nl", "computeToData").
-+allowed-archetype("UVA",    "jorrit.stutterheim@cloudnation.nl", "dataThroughTtp").
-+allowed-compute-provider("UVA", "jorrit.stutterheim@cloudnation.nl", "SURF").
+// authorize lists for UVA
+authorize-request-type("UVA", "jorrit.stutterheim@cloudnation.nl", "sqlDataRequest").
+authorize-request-type("UVA", "jorrit.stutterheim@cloudnation.nl", "genericRequest").
+authorize-data-set("UVA",     "jorrit.stutterheim@cloudnation.nl", "wageGap").
+authorize-archetype("UVA",    "jorrit.stutterheim@cloudnation.nl", "computeToData").
+authorize-archetype("UVA",    "jorrit.stutterheim@cloudnation.nl", "dataThroughTtp").
+authorize-compute-provider("UVA", "jorrit.stutterheim@cloudnation.nl", "SURF").
 
-// +revoke-archetype("VU", "jorrit.stutterheim@cloudnation.nl", "computeToData").
+revoke-archetype("VU", "jorrit.stutterheim@cloudnation.nl", "computeToData").
 
 // ---------------------------------------------------------------------------
 // Example queries and administrative acts:
-// submit-request("jorrit.stutterheim@cloudnation.nl", "VU","sqlDataRequest", "wageGap", "computeToData", "SURF").
-// ?request-allowed("VU", "jorrit.stutterheim@cloudnation.nl","sqlDataRequest", "wageGap", "computeToData", "SURF").
-
-// revoke-archetype("VU", "jorrit.stutterheim@cloudnation.nl", "computeToData").
-
 // submit-request("jorrit.stutterheim@cloudnation.nl", "VU","sqlDataRequest", "wageGap", "computeToData", "SURF").
 // ?request-allowed("VU", "jorrit.stutterheim@cloudnation.nl","sqlDataRequest", "wageGap", "computeToData", "SURF").
 // ---------------------------------------------------------------------------

@@ -17,6 +17,8 @@ import (
 
 	"github.com/nielsarts/dynamos-policy-enforcer/internal/config"
 	"github.com/nielsarts/dynamos-policy-enforcer/internal/eflint"
+	"github.com/nielsarts/dynamos-policy-enforcer/internal/policyenforcer"
+	"github.com/nielsarts/dynamos-policy-enforcer/internal/reasoner"
 )
 
 func main() {
@@ -105,6 +107,28 @@ func main() {
 	// Register eFLINT State Management API routes (POC)
 	stateGroup := e.Group("/eflint/state")
 	stateAPIHandler.RegisterRoutes(stateGroup)
+
+	// Create the eFLINT reasoner (implements the Reasoner interface)
+	eflintReasoner := reasoner.NewEflintReasoner(eflintManager, logger)
+
+	// Create the policy enforcer (uses the Reasoner interface)
+	enforcer := policyenforcer.NewEnforcer(eflintReasoner, logger)
+
+	// Register HTTP handlers for policy enforcer
+	policyEnforcerGroup := e.Group("/policy-enforcer")
+	policyEnforcerHandler := policyenforcer.NewHTTPHandler(enforcer, logger)
+	policyEnforcerHandler.RegisterRoutes(policyEnforcerGroup)
+
+	// Auto-start eFLINT server with the configured model
+	if cfg.EFlint.ModelPath != "" {
+		logger.Info("auto-starting eFLINT server",
+			zap.String("model", cfg.EFlint.ModelPath),
+		)
+		if err := eflintManager.Start(cfg.EFlint.ModelPath); err != nil {
+			logger.Error("failed to auto-start eFLINT server", zap.Error(err))
+			// Continue anyway - the server can be started manually via API
+		}
+	}
 
 	// Get HTTP port from environment or use default
 	httpPort := os.Getenv("HTTP_PORT")

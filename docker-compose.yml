@@ -8,6 +8,5 @@ services:
       - 8912:8080
     volumes:
       - ./eflint:/eflint
-    deploy:
-      restart_policy:
-        condition: on-failure
+      - ./eflint-states:/tmp/eflint-states
+    restart: unless-stopped
