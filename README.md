@@ -53,15 +53,35 @@ go build -o policy-enforcer ./cmd/policy-enforcer
 
 ### Using Docker
 
+The image builds **eflint-server** from source in a separate stage using the [eFLINT Haskell implementation](https://gitlab.com/eflint/haskell-implementation) (tag `v4.1.0.1`). This works on any architecture (amd64, ARM) and in CI/CD without relying on a prebuilt eFLINT image.
+
 ```bash
-# Build the Docker image (requires eflint:latest image)
+# Build (eflint-server is built from GitLab source; first build may take several minutes)
 docker build -t dynamos-policy-enforcer .
 
 # Run with Docker Compose
-docker-compose up -d
+docker compose up -d
 ```
 
-> **Note**: The Docker build expects an `eflint:latest` image containing the `eflint-server` binary at `/usr/bin/eflint-server`.
+**Note:** The Haskell build stage can be slow and memory-heavy. To use a different eFLINT version, change the `--branch` in the Dockerfile’s `eflint-build` stage (e.g. to another [release tag](https://gitlab.com/eflint/haskell-implementation/-/releases)).
+
+#### Rebuilding After Code Changes
+
+To rebuild the Docker image with code changes and restart the service:
+
+```bash
+# Using the helper script
+./rebuild.sh
+
+# Or manually
+docker compose down && docker compose build --no-cache && docker compose up -d && sleep 3
+```
+
+The `rebuild.sh` script will:
+1. Stop all running containers
+2. Rebuild images without cache (ensures fresh build)
+3. Start containers in detached mode
+4. Wait 3 seconds for services to initialize
 
 ## Configuration
 

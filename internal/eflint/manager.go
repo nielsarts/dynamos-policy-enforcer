@@ -285,6 +285,12 @@ func (m *Manager) GetState() (string, error) {
 	return m.SendCommand(`{"command": "create-export"}`)
 }
 
+// GetEflintStatus retrieves the status from the eFLINT server.
+// This returns detailed information about the current state of the server.
+func (m *Manager) GetEflintStatus() (string, error) {
+	return m.SendCommand(`{"command": "status"}`)
+}
+
 // startProcess starts a new eFLINT server process.
 func (m *Manager) startProcess(modelLocation string, port int) (*exec.Cmd, error) {
 	cmd := exec.Command(m.config.EflintServerPath, modelLocation, fmt.Sprintf("%d", port))

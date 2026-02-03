@@ -1,0 +1,242 @@
+{
+  "current": 3,
+  "edges": [
+    {
+      "po": {
+        "output": "[]",
+        "program": "+actor(\"Alice\")"
+      },
+      "source": 1,
+      "target": 2
+    },
+    {
+      "po": {
+        "output": "[]",
+        "program": "+actor(\"Bob\")"
+      },
+      "source": 2,
+      "target": 3
+    }
+  ],
+  "nodes": [
+    {
+      "config": {
+        "rest_duties": [],
+        "rest_transitions": [],
+        "spec": {
+          "aliases": {},
+          "decls": {
+            "actor": {
+              "closed": true,
+              "conditions": [],
+              "derivation": [],
+              "domain": {
+                "domain-type": "AnyString"
+              },
+              "domain_constraint": {
+                "b": true,
+                "term-type": "BoolLit"
+              },
+              "kind": {
+                "fact": {
+                  "actor": true,
+                  "invariant": false
+                },
+                "kind-type": "Fact"
+              }
+            },
+            "int": {
+              "closed": true,
+              "conditions": [],
+              "derivation": [],
+              "domain": {
+                "domain-type": "AnyInt"
+              },
+              "domain_constraint": {
+                "b": true,
+                "term-type": "BoolLit"
+              },
+              "kind": {
+                "fact": {
+                  "actor": false,
+                  "invariant": false
+                },
+                "kind-type": "Fact"
+              }
+            },
+            "string": {
+              "closed": true,
+              "conditions": [],
+              "derivation": [],
+              "domain": {
+                "domain-type": "AnyString"
+              },
+              "domain_constraint": {
+                "b": true,
+                "term-type": "BoolLit"
+              },
+              "kind": {
+                "fact": {
+                  "actor": false,
+                  "invariant": false
+                },
+                "kind-type": "Fact"
+              }
+            }
+          }
+        },
+        "state": {
+          "contents": "fromList []",
+          "time": 0
+        }
+      },
+      "ref": 1
+    },
+    {
+      "config": {
+        "rest_duties": [],
+        "rest_transitions": [],
+        "spec": {
+          "aliases": {},
+          "decls": {
+            "actor": {
+              "closed": true,
+              "conditions": [],
+              "derivation": [],
+              "domain": {
+                "domain-type": "AnyString"
+              },
+              "domain_constraint": {
+                "b": true,
+                "term-type": "BoolLit"
+              },
+              "kind": {
+                "fact": {
+                  "actor": true,
+                  "invariant": false
+                },
+                "kind-type": "Fact"
+              }
+            },
+            "int": {
+              "closed": true,
+              "conditions": [],
+              "derivation": [],
+              "domain": {
+                "domain-type": "AnyInt"
+              },
+              "domain_constraint": {
+                "b": true,
+                "term-type": "BoolLit"
+              },
+              "kind": {
+                "fact": {
+                  "actor": false,
+                  "invariant": false
+                },
+                "kind-type": "Fact"
+              }
+            },
+            "string": {
+              "closed": true,
+              "conditions": [],
+              "derivation": [],
+              "domain": {
+                "domain-type": "AnyString"
+              },
+              "domain_constraint": {
+                "b": true,
+                "term-type": "BoolLit"
+              },
+              "kind": {
+                "fact": {
+                  "actor": false,
+                  "invariant": false
+                },
+                "kind-type": "Fact"
+              }
+            }
+          }
+        },
+        "state": {
+          "contents": "fromList [((String \"Alice\",\"actor\"),Info {value = True, from_sat = False})]",
+          "time": 0
+        }
+      },
+      "ref": 2
+    },
+    {
+      "config": {
+        "rest_duties": [],
+        "rest_transitions": [],
+        "spec": {
+          "aliases": {},
+          "decls": {
+            "actor": {
+              "closed": true,
+              "conditions": [],
+              "derivation": [],
+              "domain": {
+                "domain-type": "AnyString"
+              },
+              "domain_constraint": {
+                "b": true,
+                "term-type": "BoolLit"
+              },
+              "kind": {
+                "fact": {
+                  "actor": true,
+                  "invariant": false
+                },
+                "kind-type": "Fact"
+              }
+            },
+            "int": {
+              "closed": true,
+              "conditions": [],
+              "derivation": [],
+              "domain": {
+                "domain-type": "AnyInt"
+              },
+              "domain_constraint": {
+                "b": true,
+                "term-type": "BoolLit"
+              },
+              "kind": {
+                "fact": {
+                  "actor": false,
+                  "invariant": false
+                },
+                "kind-type": "Fact"
+              }
+            },
+            "string": {
+              "closed": true,
+              "conditions": [],
+              "derivation": [],
+              "domain": {
+                "domain-type": "AnyString"
+              },
+              "domain_constraint": {
+                "b": true,
+                "term-type": "BoolLit"
+              },
+              "kind": {
+                "fact": {
+                  "actor": false,
+                  "invariant": false
+                },
+                "kind-type": "Fact"
+              }
+            }
+          }
+        },
+        "state": {
+          "contents": "fromList [((String \"Alice\",\"actor\"),Info {value = True, from_sat = False}),((String \"Bob\",\"actor\"),Info {value = True, from_sat = False})]",
+          "time": 0
+        }
+      },
+      "ref": 3
+    }
+  ]
+}

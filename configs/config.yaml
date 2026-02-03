@@ -8,7 +8,7 @@ rabbitmq:
   password: guest
   queue: policyEnforcer-in
   exchange: topic_exchange
-  routing_key: policy.enforcer
+  routing_key: policyEnforcer-in
   prefetch_count: 10
   reconnect_delay: 5s
 
@@ -24,7 +24,7 @@ eflint:
 
 # Logging settings
 logging:
-  level: info  # debug, info, warn, error
+  level: debug  # debug, info, warn, error
   format: json  # json or console
   output: stdout  # stdout, stderr, or file path
   development: false
