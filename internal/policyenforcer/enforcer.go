@@ -201,7 +201,6 @@ func (e *Enforcer) ValidateRequest(ctx context.Context, params *ValidateRequestP
 		DataSet:         params.DataSet,
 		Archetype:       params.Archetype,
 		ComputeProvider: params.ComputeProvider,
-		DebugResponse:   result.RawResponse, // DEBUG: Include raw reasoner response temporarily
 	}
 
 	e.logger.Info("request validation complete",

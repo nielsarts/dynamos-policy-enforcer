@@ -189,7 +189,6 @@ func (r *EflintReasoner) IsRequestAllowed(ctx context.Context, params RequestPar
 	if err != nil {
 		return nil, err
 	}
-	result.RawResponse = response // DEBUG: Include raw response temporarily
 	return result, nil
 }
 
